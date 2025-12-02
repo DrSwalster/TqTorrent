@@ -1,411 +1,315 @@
 #!/usr/bin/env python3
 """
-TqTorrent Setup - ETS2 Launcher Style
+TqTorrent Setup - Install in Documents
 """
 
 import os
 import sys
 import subprocess
-import time
-import threading
 from pathlib import Path
 import datetime
 import traceback
 
-def check_python_installation():
-    """Check if Python is properly installed"""
+def get_documents_folder():
+    """Get Documents folder path"""
     try:
-        result = subprocess.run([sys.executable, "--version"], 
-                              capture_output=True, text=True, check=True)
-        return True, result.stdout.strip()
-    except FileNotFoundError:
-        return False, "Python not found in PATH"
+        # Try multiple methods to get Documents folder
+        docs = Path.home() / "Documents"
+        if docs.exists():
+            return docs
+        
+        # Try environment variable
+        docs_env = os.environ.get("USERPROFILE", "")
+        if docs_env:
+            docs = Path(docs_env) / "Documents"
+            if docs.exists():
+                return docs
+        
+        # Last resort - current directory
+        print("⚠ Documents folder not found, using current directory")
+        return Path.cwd()
+        
     except Exception as e:
-        return False, f"Python error: {str(e)}"
+        print(f"⚠ Error getting Documents folder: {e}")
+        return Path.cwd()
 
-def check_and_install_library(lib_name):
-    """Check and install a Python library"""
-    try:
-        # Try to import
-        __import__(lib_name)
-        return True, f"{lib_name} already installed"
-    except ImportError:
-        # Try to install
-        try:
-            print(f"Installing {lib_name}...")
-            result = subprocess.run(
-                [sys.executable, "-m", "pip", "install", lib_name],
-                capture_output=True,
-                text=True,
-                timeout=120
-            )
-            if result.returncode == 0:
-                return True, f"{lib_name} installed successfully"
-            else:
-                return False, f"Failed to install {lib_name}: {result.stderr}"
-        except subprocess.TimeoutExpired:
-            return False, f"Timeout installing {lib_name}"
-        except Exception as e:
-            return False, f"Error installing {lib_name}: {str(e)}"
-
-def install_required_libraries():
-    """Install all required libraries"""
-    required_libs = ["requests", "beautifulsoup4", "psutil", "pillow"]
-    
-    print("\n" + "="*50)
-    print("Checking and installing required libraries...")
-    print("="*50)
-    
-    for lib in required_libs:
-        success, message = check_and_install_library(lib)
-        if success:
-            print(f"✓ {message}")
-        else:
-            print(f"✗ {message}")
-    
-    print("\nLibrary installation complete!")
-    return True
-
-def create_tqtorrent_structure():
+def create_folder_structure(base_dir):
     """Create TqTorrent folder structure"""
+    print(f"\n📁 Creating TqTorrent in: {base_dir}")
+    
     try:
-        base_dir = Path.home() / "Documents" / "TqTorrent"
-        
-        print("\n" + "="*50)
-        print("Creating TqTorrent folder structure...")
-        print("="*50)
-        
         # Create main directory
         base_dir.mkdir(exist_ok=True)
-        print(f"✓ Main directory: {base_dir}")
+        print(f"✓ Main folder: {base_dir.name}")
         
         # Create subdirectories
-        directories = [
-            'Localsaves_by_TqTorrent/saves',
-            'log',
-            'TqManager',
-            'Version',
-            'mods',
-            'profiles',
-            'downloads',
-            'cache',
-            'backups'
+        dirs_to_create = [
+            "Localsaves_by_TqTorrent/saves",
+            "log",
+            "TqManager",
+            "Version",
+            "mods",
+            "profiles",
+            "downloads"
         ]
         
-        for dir_path in directories:
+        for dir_path in dirs_to_create:
             full_path = base_dir / dir_path
             full_path.mkdir(parents=True, exist_ok=True)
             print(f"✓ Created: {dir_path}")
         
-        # Create configuration files
+        # Create files
         create_config_files(base_dir)
         
-        print("\n" + "="*50)
-        print("Folder structure created successfully!")
-        print("="*50)
+        return True
         
-        return True, base_dir
-        
+    except PermissionError:
+        print(f"✗ Permission denied for: {base_dir}")
+        print("  Try running as Administrator")
+        return False
     except Exception as e:
-        return False, f"Error creating structure: {str(e)}"
+        print(f"✗ Error creating structure: {e}")
+        return False
 
 def create_config_files(base_dir):
     """Create all configuration files"""
-    # cnf.txt
-    cnf_content = f"""# TqTorrent Configuration
+    print("\n📝 Creating configuration files...")
+    
+    try:
+        # 1. cnf.txt
+        cnf_content = f"""# TqTorrent Configuration
 # Created: {datetime.datetime.now()}
 # Version: 1.0.0
 
 [General]
 app_name=TqTorrent
 version=1.0.0
-author=DrSwalster
-first_run=true
 
 [Paths]
 base={base_dir}
-saves={base_dir}/Localsaves_by_TqTorrent/saves
-logs={base_dir}/log
-mods={base_dir}/mods
-profiles={base_dir}/profiles
+saves={base_dir}\\Localsaves_by_TqTorrent\\saves
+logs={base_dir}\\log
 
 [Settings]
-auto_update=true
-backup_enabled=true
+first_run=true
 """
-    
-    cnf_file = base_dir / "Localsaves_by_TqTorrent" / "saves" / "cnf.txt"
-    cnf_file.parent.mkdir(parents=True, exist_ok=True)
-    cnf_file.write_text(cnf_content, encoding='utf-8')
-    print(f"✓ Created: cnf.txt")
-    
-    # Empty config file
-    config_file = base_dir / "Localsaves_by_TqTorrent" / "saves" / "config"
-    config_file.touch()
-    print(f"✓ Created: config")
-    
-    # Log file
-    log_content = f"""TqTorrent Log
+        cnf_file = base_dir / "Localsaves_by_TqTorrent" / "saves" / "cnf.txt"
+        cnf_file.parent.mkdir(parents=True, exist_ok=True)
+        cnf_file.write_text(cnf_content, encoding='utf-8')
+        print("✓ Created: cnf.txt")
+        
+        # 2. Empty config file
+        config_file = base_dir / "Localsaves_by_TqTorrent" / "saves" / "config"
+        config_file.touch()
+        print("✓ Created: config")
+        
+        # 3. log.txt
+        log_content = f"""TqTorrent Log
 {"="*40}
 Date: {datetime.datetime.now()}
-Version: 1.0.0
+Path: {base_dir}
 {"="*40}
 
-[INFO] Initial setup completed
+[INFO] Setup completed successfully
 """
-    log_file = base_dir / "log" / "log.txt"
-    log_file.parent.mkdir(parents=True, exist_ok=True)
-    log_file.write_text(log_content, encoding='utf-8')
-    print(f"✓ Created: log.txt")
-    
-    # Version file
-    version_content = f"""TqTorrent v1.0.0
+        log_file = base_dir / "log" / "log.txt"
+        log_file.parent.mkdir(parents=True, exist_ok=True)
+        log_file.write_text(log_content, encoding='utf-8')
+        print("✓ Created: log.txt")
+        
+        # 4. version.txt
+        version_content = f"""TqTorrent v1.0.0
 Install Date: {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+Location: {base_dir}
 """
-    version_file = base_dir / "Version" / "version.txt"
-    version_file.parent.mkdir(parents=True, exist_ok=True)
-    version_file.write_text(version_content, encoding='utf-8')
-    print(f"✓ Created: version.txt")
+        version_file = base_dir / "Version" / "version.txt"
+        version_file.parent.mkdir(parents=True, exist_ok=True)
+        version_file.write_text(version_content, encoding='utf-8')
+        print("✓ Created: version.txt")
+        
+        return True
+        
+    except Exception as e:
+        print(f"✗ Error creating config files: {e}")
+        return False
 
 def create_main_program(base_dir):
-    """Create main.py program file"""
+    """Create main.py program"""
     try:
         main_content = '''#!/usr/bin/env python3
 """
 TqTorrent Main Program
 """
 
-import os
-import sys
-from pathlib import Path
-import datetime
-
 print("="*60)
-print("            TQTORRENT - MAIN PROGRAM")
+print("            TQTORRENT")
 print("="*60)
 print()
-print("🎉 Congratulations! TqTorrent has been successfully installed!")
+print("✅ Program successfully installed!")
 print()
-print(f"Installation directory: {Path(__file__).parent}")
-print(f"Installation date: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-print()
-print("📁 Folder structure:")
-print("  • Documents/TqTorrent/ - Main directory")
-print("  • Documents/TqTorrent/Localsaves_by_TqTorrent/saves/ - Saves and configs")
-print("  • Documents/TqTorrent/log/ - Log files")
-print("  • Documents/TqTorrent/TqManager/ - Manager files")
-print("  • Documents/TqTorrent/Version/ - Version info")
-print("  • Documents/TqTorrent/mods/ - Mods directory")
-print("  • Documents/TqTorrent/profiles/ - Profiles directory")
-print()
-print("🚀 What's next:")
-print("  1. You can add your Python scripts to this folder")
-print("  2. Modify config files in Localsaves_by_TqTorrent/saves/")
-print("  3. Check logs in log/ folder")
+print("📁 Installation completed.")
+print("🎉 You can now use TqTorrent!")
 print()
 print("="*60)
 print()
 input("Press Enter to exit...")
 '''
-        
         main_file = base_dir / "TqTorrent.py"
         main_file.write_text(main_content, encoding='utf-8')
-        print(f"✓ Created: TqTorrent.py")
-        
+        print("✓ Created: TqTorrent.py")
         return main_file
         
     except Exception as e:
-        print(f"✗ Error creating main program: {str(e)}")
+        print(f"✗ Error creating main program: {e}")
         return None
 
-def create_desktop_shortcut(base_dir, main_file):
-    """Create desktop shortcut"""
+def create_launcher(base_dir, main_file):
+    """Create launcher files"""
     try:
-        desktop = Path.home() / "Desktop"
-        
-        # Create .bat file shortcut
+        # Create .bat launcher in Documents folder
         bat_content = f'''@echo off
 chcp 65001 >nul
-title TqTorrent Launcher
+title TqTorrent
 color 0A
 echo ========================================
-echo        TQTORRENT LAUNCHER
+echo          TQTORRENT LAUNCHER
 echo ========================================
 echo.
 echo Starting TqTorrent...
 echo.
 cd /d "{base_dir}"
-"{sys.executable}" "{main_file}"
+"{sys.executable}" "TqTorrent.py"
 echo.
-echo Press any key to exit...
-pause >nul
+echo Program finished.
+pause
 '''
+        bat_file = base_dir / "Launch_TqTorrent.bat"
+        bat_file.write_text(bat_content, encoding='utf-8')
+        print("✓ Created: Launch_TqTorrent.bat")
         
-        shortcut_path = desktop / "TqTorrent.bat"
-        shortcut_path.write_text(bat_content, encoding='utf-8')
-        print(f"✓ Desktop shortcut: {shortcut_path}")
-        
-        # Also create a simple launcher.py
-        launcher_content = f'''#!/usr/bin/env python3
-"""
-TqTorrent Launcher
-"""
-
-import subprocess
-import sys
-import os
-
-print("Launching TqTorrent...")
-print(f"Python: {sys.executable}")
-print(f"Script: {main_file}")
-
-try:
-    subprocess.run([sys.executable, str(main_file)])
-except Exception as e:
-    print(f"Error: {{e}}")
-    input("Press Enter to exit...")
+        # Try to create desktop shortcut
+        try:
+            desktop = Path.home() / "Desktop"
+            if desktop.exists():
+                desktop_bat = desktop / "TqTorrent.bat"
+                desktop_content = f'''@echo off
+echo Launching TqTorrent from Documents...
+cd /d "{base_dir}"
+"Launch_TqTorrent.bat"
 '''
-        
-        launcher_path = base_dir / "launcher.py"
-        launcher_path.write_text(launcher_content, encoding='utf-8')
+                desktop_bat.write_text(desktop_content, encoding='utf-8')
+                print("✓ Created desktop shortcut")
+        except:
+            print("⚠ Could not create desktop shortcut")
         
         return True
         
     except Exception as e:
-        print(f"✗ Error creating shortcut: {str(e)}")
+        print(f"✗ Error creating launcher: {e}")
         return False
 
-def console_setup():
-    """Run setup in console mode"""
+def setup():
+    """Main setup function"""
     print("\n" + "="*60)
-    print("         TQTORRENT SETUP ASSISTANT")
+    print("         TQTORRENT SETUP")
     print("="*60)
     print()
     
-    # Step 1: Check Python
-    print("[1/6] Checking Python installation...")
-    success, message = check_python_installation()
-    if not success:
-        print(f"✗ ERROR: {message}")
-        print("\nPlease install Python first:")
-        print("1. Download from: https://www.python.org/downloads/")
-        print("2. During installation, CHECK 'Add Python to PATH'")
-        print("3. Then run this setup again")
-        input("\nPress Enter to exit...")
-        return
+    # Get Documents folder
+    docs_folder = get_documents_folder()
+    base_dir = docs_folder / "TqTorrent"
     
-    print(f"✓ {message}")
+    print(f"📁 Will install to: {base_dir}")
+    print()
     
-    # Step 2: Install libraries
-    print("\n[2/6] Installing required libraries...")
-    if not install_required_libraries():
-        print("⚠ Some libraries may not be installed properly")
-        print("You can install them manually later:")
-        print("pip install requests beautifulsoup4 psutil pillow")
+    # Step 1: Create structure
+    print("[1/3] Creating folder structure...")
+    if not create_folder_structure(base_dir):
+        print("\n❌ Failed to create folder structure")
+        print("Trying alternative location...")
+        
+        # Try current directory as fallback
+        base_dir = Path.cwd() / "TqTorrent"
+        print(f"Trying: {base_dir}")
+        
+        if not create_folder_structure(base_dir):
+            input("\n❌ Setup failed. Press Enter to exit...")
+            return False
     
-    # Step 3: Create structure
-    print("\n[3/6] Creating folder structure...")
-    success, result = create_tqtorrent_structure()
-    if not success:
-        print(f"✗ ERROR: {result}")
-        input("\nPress Enter to exit...")
-        return
-    
-    base_dir = result
-    
-    # Step 4: Create main program
-    print("\n[4/6] Creating main program...")
+    # Step 2: Create main program
+    print("\n[2/3] Creating main program...")
     main_file = create_main_program(base_dir)
     if not main_file:
-        print("⚠ Could not create main program file")
-        # Create at least an empty file
-        try:
-            main_file = base_dir / "TqTorrent.py"
-            main_file.write_text("# TqTorrent Main Program\n", encoding='utf-8')
-            print(f"✓ Created empty: TqTorrent.py")
-        except:
-            print("✗ Failed to create any main program file")
+        print("⚠ Warning: Main program not created")
     
-    # Step 5: Create shortcut
-    print("\n[5/6] Creating desktop shortcut...")
-    if not create_desktop_shortcut(base_dir, main_file):
-        print("⚠ Could not create desktop shortcut")
-    
-    # Step 6: Complete
-    print("\n[6/6] Setup complete!")
-    print("\n" + "="*60)
-    print("         SETUP COMPLETED SUCCESSFULLY!")
-    print("="*60)
-    print()
-    print("TqTorrent has been installed to:")
-    print(f"  📁 {base_dir}")
-    print()
-    print("To launch TqTorrent:")
-    print(f"  1. Double-click 'TqTorrent.bat' on your Desktop")
+    # Step 3: Create launcher
+    print("\n[3/3] Creating launcher...")
     if main_file:
-        print(f"  2. Or run: \"{sys.executable}\" \"{main_file}\"")
+        create_launcher(base_dir, main_file)
+    else:
+        print("⚠ Skipping launcher (no main program)")
+    
+    # Summary
+    print("\n" + "="*60)
+    print("         SETUP COMPLETE!")
+    print("="*60)
     print()
-    print("Created files:")
-    print("  • Documents/TqTorrent/TqTorrent.py - Main program")
-    print("  • Documents/TqTorrent/launcher.py - Launcher script")
-    print("  • Desktop/TqTorrent.bat - Desktop shortcut")
-    print("  • Various config files in subfolders")
+    print("✅ TqTorrent has been installed!")
+    print()
+    print(f"📁 Location: {base_dir}")
+    print()
+    print("🚀 How to run:")
+    print(f"   1. Go to: {base_dir}")
+    print(f"   2. Run 'Launch_TqTorrent.bat'")
+    
+    if main_file and main_file.exists():
+        print(f"   3. Or run: \"{sys.executable}\" \"TqTorrent.py\"")
+    
+    print()
+    print("📁 Created folders:")
+    try:
+        for item in base_dir.iterdir():
+            if item.is_dir():
+                print(f"   • {item.name}/")
+            elif item.suffix in ['.py', '.bat']:
+                print(f"   • {item.name}")
+    except:
+        print("   (Cannot list contents)")
+    
     print()
     print("="*60)
     
-    # Ask to launch
+    # Ask to run
     print()
-    choice = input("Launch TqTorrent now? (Y/N): ").strip().upper()
-    if choice == 'Y' and main_file:
-        print("\nLaunching TqTorrent...")
-        print(f"Python: {sys.executable}")
-        print(f"Script: {main_file}")
-        try:
-            # Check if file exists
-            if main_file.exists():
-                subprocess.run([sys.executable, str(main_file)])
-            else:
-                print(f"✗ File not found: {main_file}")
-                print(f"Please check if the file exists.")
-        except Exception as e:
-            print(f"✗ Could not launch: {str(e)}")
-            print(f"Please run manually: \"{sys.executable}\" \"{main_file}\"")
-    elif not main_file:
-        print("\n⚠ Main program file was not created.")
-        print(f"Please check the folder: {base_dir}")
+    choice = input("Run TqTorrent now? (Y/N): ").strip().upper()
+    if choice == 'Y' and main_file and main_file.exists():
+        print("\n🚀 Launching TqTorrent...\n")
+        subprocess.run([sys.executable, str(main_file)])
     
     input("\nPress Enter to exit setup...")
+    return True
 
 def main():
-    """Main entry point"""
-    print("TqTorrent Setup - Starting...")
-    print(f"Python executable: {sys.executable}")
-    print(f"Current directory: {os.getcwd()}")
-    
-    # Set UTF-8 encoding for Windows
-    if sys.platform == "win32":
-        os.system("chcp 65001 >nul")
-    
-    # Check command line arguments
-    if len(sys.argv) > 1 and sys.argv[1] == "--console":
-        console_setup()
-    else:
-        console_setup()
-
-if __name__ == "__main__":
+    """Main function"""
     try:
-        main()
+        # Set UTF-8 for Windows
+        if sys.platform == "win32":
+            os.system("chcp 65001 >nul")
+        
+        # Print debug info
+        print(f"Python: {sys.executable}")
+        print(f"Current dir: {Path.cwd()}")
+        
+        setup()
+        
     except KeyboardInterrupt:
-        print("\n\nSetup cancelled by user.")
+        print("\n\nSetup cancelled.")
         input("Press Enter to exit...")
     except Exception as e:
         print(f"\n\n❌ UNEXPECTED ERROR:")
-        print(f"Error type: {type(e).__name__}")
-        print(f"Error message: {str(e)}")
-        print("\nTraceback:")
+        print(f"Error: {e}")
         traceback.print_exc()
-        print("\nSystem information:")
-        print(f"Python: {sys.version}")
-        print(f"Platform: {sys.platform}")
-        print(f"Executable: {sys.executable}")
         input("\nPress Enter to exit...")
+
+if __name__ == "__main__":
+    main()
