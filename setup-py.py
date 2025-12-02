@@ -1,195 +1,191 @@
 import os
 import sys
+import subprocess
+import json
 from pathlib import Path
 import datetime
 
-def create_tqtorrent_structure():
-    """Создаёт структуру папок и файлов для TqTorrent"""
+def setup_logging():
+    """Настройка системы логирования"""
+    log_dir = Path.home() / "Documents" / "TqTorrent" / "log"
+    log_file = log_dir / "tqtorrent.log"
     
-    # Основная папка в Документах
-    base_dir = Path.home() / "Documents" / "TqTorrent"
+    log_dir.mkdir(parents=True, exist_ok=True)
     
-    # Подпапки
-    localsaves_dir = base_dir / "Localsaves_by_TqTorrent"
-    log_dir = base_dir / "log"
-    tqmanager_dir = base_dir / "TqManager"
-    version_dir = base_dir / "Version"
+    with open(log_file, 'a', encoding='utf-8') as f:
+        f.write(f"\n{'='*60}\n")
+        f.write(f"TqTorrent запущен: {datetime.datetime.now()}\n")
+        f.write(f"Python: {sys.version}\n")
+        f.write(f"Платформа: {sys.platform}\n")
     
-    # Папка saves внутри Localsaves_by_TqTorrent
-    saves_dir = localsaves_dir / "saves"
+    return log_file
+
+def check_dependencies():
+    """Проверяет и устанавливает зависимости"""
+    print("=" * 60)
+    print("TqTorrent - Проверка зависимостей")
+    print("=" * 60)
     
-    print("=" * 50)
-    print("Создание структуры TqTorrent")
-    print("=" * 50)
+    # Базовые библиотеки (всегда нужны)
+    base_libs = ["requests", "beautifulsoup4", "psutil"]
+    
+    # Дополнительные библиотеки по категориям
+    categories = {
+        "web": ["flask", "django", "fastapi"],
+        "data": ["pandas", "numpy", "matplotlib"],
+        "gui": ["PyQt5", "tkinter", "customtkinter"],
+        "automation": ["selenium", "pyautogui", "schedule"],
+        "database": ["sqlalchemy", "psycopg2", "pymongo"]
+    }
+    
+    print("\nВыберите категории для установки:")
+    print("1. Базовые (уже установлены)")
+    for i, (cat, libs) in enumerate(categories.items(), 2):
+        print(f"{i}. {cat.capitalize()} ({', '.join(libs)})")
+    print(f"{len(categories)+2}. ВСЕ библиотеки")
+    print(f"{len(categories)+3}. Только базовые (пропустить)")
     
     try:
-        # Создаём основную папку
-        base_dir.mkdir(exist_ok=True)
-        print(f"[✓] Основная папка: {base_dir}")
+        choice = input("\nВаш выбор (через запятую, например: 1,2,3): ")
+        choices = [c.strip() for c in choice.split(',')]
         
-        # Создаём Localsaves_by_TqTorrent
-        localsaves_dir.mkdir(exist_ok=True)
-        print(f"[✓] Папка Localsaves_by_TqTorrent создана")
+        libraries_to_install = []
         
-        # Создаём папку saves
-        saves_dir.mkdir(exist_ok=True)
-        print(f"[✓] Папка saves создана")
-        
-        # Создаём файлы в папке saves
-        config_file = saves_dir / "config"
-        config_file.touch(exist_ok=True)
-        print(f"[✓] Файл config создан")
-        
-        cnf_file = saves_dir / "cnf.txt"
-        if not cnf_file.exists():
-            with open(cnf_file, 'w', encoding='utf-8') as f:
-                f.write("# Конфигурационный файл TqTorrent\n")
-                f.write(f"created_at: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-                f.write("version: 1.0\n")
-            print(f"[✓] Файл cnf.txt создан и заполнен")
+        if str(len(categories)+2) in choices:  # Все библиотеки
+            for libs in categories.values():
+                libraries_to_install.extend(libs)
+        elif str(len(categories)+3) in choices:  # Только базовые
+            libraries_to_install = []
         else:
-            print(f"[✓] Файл cnf.txt уже существует")
+            # Добавляем выбранные категории
+            for choice_num in choices:
+                if choice_num.isdigit():
+                    idx = int(choice_num) - 2  # -2 потому что 1=базовые
+                    if 0 <= idx < len(categories):
+                        cat_name = list(categories.keys())[idx]
+                        libraries_to_install.extend(categories[cat_name])
         
-        # Создаём папку log
-        log_dir.mkdir(exist_ok=True)
-        print(f"[✓] Папка log создана")
-        
-        # Создаём log.txt с начальной записью
-        log_file = log_dir / "log.txt"
-        if not log_file.exists():
-            with open(log_file, 'w', encoding='utf-8') as f:
-                f.write("=" * 50 + "\n")
-                f.write(f"Лог TqTorrent - {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-                f.write("=" * 50 + "\n\n")
-                f.write("[INIT] Структура папок создана успешно\n")
-                f.write(f"[INFO] Путь: {base_dir}\n")
-            print(f"[✓] Файл log.txt создан и заполнен")
+        # Установка библиотек
+        if libraries_to_install:
+            print(f"\nУстанавливаю {len(libraries_to_install)} библиотек...")
+            for lib in libraries_to_install:
+                print(f"  → {lib}...", end=" ")
+                try:
+                    subprocess.check_call([sys.executable, "-m", "pip", "install", lib])
+                    print("✓")
+                except subprocess.CalledProcessError:
+                    print("✗")
         else:
-            # Добавляем запись в существующий лог
-            with open(log_file, 'a', encoding='utf-8') as f:
-                f.write(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Структура проверена/создана\n")
-            print(f"[✓] Запись добавлена в существующий log.txt")
-        
-        # Создаём папку TqManager
-        tqmanager_dir.mkdir(exist_ok=True)
-        print(f"[✓] Папка TqManager создана")
-        
-        # Создаём базовый файл в TqManager
-        manager_file = tqmanager_dir / "manager_config.ini"
-        if not manager_file.exists():
-            with open(manager_file, 'w', encoding='utf-8') as f:
-                f.write("[TqManager]\n")
-                f.write(f"created = {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-                f.write("active = true\n")
-            print(f"[✓] Файл manager_config.ini создан в TqManager")
-        
-        # Создаём папку Version
-        version_dir.mkdir(exist_ok=True)
-        print(f"[✓] Папка Version создана")
-        
-        # Создаём файл версии
-        version_file = version_dir / "version.txt"
-        if not version_file.exists():
-            with open(version_file, 'w', encoding='utf-8') as f:
-                f.write("TqTorrent v1.0.0\n")
-                f.write(f"Build date: {datetime.datetime.now().strftime('%Y-%m-%d')}\n")
-                f.write("Structure created\n")
-            print(f"[✓] Файл version.txt создан")
-        
-        print("\n" + "=" * 50)
-        print("СТРУКТУРА УСПЕШНО СОЗДАНА!")
-        print("=" * 50)
-        print(f"\nСозданные папки и файлы:")
-        print(f"📁 {base_dir}/")
-        print(f"  📁 Localsaves_by_TqTorrent/")
-        print(f"    📁 saves/")
-        print(f"      📄 config")
-        print(f"      📄 cnf.txt")
-        print(f"  📁 log/")
-        print(f"    📄 log.txt")
-        print(f"  📁 TqManager/")
-        print(f"    📄 manager_config.ini")
-        print(f"  📁 Version/")
-        print(f"    📄 version.txt")
-        
-        # Записываем путь в отдельный файл для использования другими скриптами
-        path_info = base_dir / "path_info.txt"
-        with open(path_info, 'w', encoding='utf-8') as f:
-            f.write(str(base_dir))
-        
-        return True, str(base_dir)
-        
+            print("\nУстановка библиотек пропущена.")
+            
     except Exception as e:
-        print(f"\n[✗] ОШИБКА: Не удалось создать структуру")
-        print(f"Ошибка: {e}")
-        return False, str(e)
+        print(f"\nОшибка: {e}")
 
-def check_existing_structure():
-    """Проверяет существующую структуру"""
-    base_dir = Path.home() / "Documents" / "TqTorrent"
+def create_project_structure():
+    """Создаёт структуру проекта для пользователя"""
+    print("\n" + "=" * 60)
+    print("Создание структуры проекта")
+    print("=" * 60)
     
-    if base_dir.exists():
-        print("\n" + "=" * 50)
-        print("ПРОВЕРКА СУЩЕСТВУЮЩЕЙ СТРУКТУРЫ")
-        print("=" * 50)
+    project_name = input("Введите имя проекта (или Enter для пропуска): ").strip()
+    
+    if project_name:
+        project_dir = Path.cwd() / project_name
         
-        required_items = [
-            (base_dir / "Localsaves_by_TqTorrent", "папка"),
-            (base_dir / "Localsaves_by_TqTorrent" / "saves", "папка"),
-            (base_dir / "Localsaves_by_TqTorrent" / "saves" / "config", "файл"),
-            (base_dir / "Localsaves_by_TqTorrent" / "saves" / "cnf.txt", "файл"),
-            (base_dir / "log", "папка"),
-            (base_dir / "log" / "log.txt", "файл"),
-            (base_dir / "TqManager", "папка"),
-            (base_dir / "Version", "папка"),
-        ]
+        try:
+            # Создаём структуру проекта
+            (project_dir / "src").mkdir(parents=True, exist_ok=True)
+            (project_dir / "data").mkdir(parents=True, exist_ok=True)
+            (project_dir / "docs").mkdir(parents=True, exist_ok=True)
+            (project_dir / "tests").mkdir(parents=True, exist_ok=True)
+            
+            # Создаём основные файлы
+            files = {
+                "README.md": f"# {project_name}\n\nПроект создан с помощью TqTorrent",
+                "requirements.txt": "# Зависимости проекта\n\n",
+                "main.py": "#!/usr/bin/env python3\n\"\"\"Основной файл проекта\"\"\"\n\nprint('Hello from TqTorrent!')\n",
+                ".gitignore": "__pycache__/\n*.pyc\n.env\n"
+            }
+            
+            for filename, content in files.items():
+                (project_dir / filename).write_text(content, encoding='utf-8')
+            
+            print(f"\n✅ Проект '{project_name}' создан в: {project_dir}")
+            
+        except Exception as e:
+            print(f"\n❌ Ошибка при создании проекта: {e}")
+
+def main_menu():
+    """Главное меню программы"""
+    while True:
+        print("\n" + "=" * 60)
+        print("TQTORRENT - ГЛАВНОЕ МЕНЮ")
+        print("=" * 60)
+        print("1. 📦 Установить дополнительные библиотеки")
+        print("2. 📁 Создать новый проект")
+        print("3. 🔧 Настройки")
+        print("4. ℹ️  Информация о системе")
+        print("5. 📝 Логи")
+        print("6. 🚪 Выход")
+        print("=" * 60)
         
-        missing_items = []
+        choice = input("\nВыберите действие (1-6): ").strip()
         
-        for item_path, item_type in required_items:
-            if item_path.exists():
-                print(f"[✓] {item_type.capitalize()} существует: {item_path.name}")
+        if choice == "1":
+            check_dependencies()
+        elif choice == "2":
+            create_project_structure()
+        elif choice == "3":
+            print("\nНастройки пока не реализованы")
+        elif choice == "4":
+            print(f"\nИнформация о системе:")
+            print(f"Python: {sys.version}")
+            print(f"Платформа: {sys.platform}")
+            print(f"Текущая папка: {Path.cwd()}")
+        elif choice == "5":
+            log_file = Path.home() / "Documents" / "TqTorrent" / "log" / "tqtorrent.log"
+            if log_file.exists():
+                print(f"\nПоследние записи лога ({log_file}):")
+                with open(log_file, 'r', encoding='utf-8') as f:
+                    lines = f.readlines()[-20:]  # Последние 20 строк
+                    print(''.join(lines))
             else:
-                print(f"[✗] {item_type.capitalize()} отсутствует: {item_path.name}")
-                missing_items.append((item_path, item_type))
-        
-        return missing_items
-    return []
+                print("\nЛог файл не найден")
+        elif choice == "6":
+            print("\nДо свидания!")
+            break
+        else:
+            print("\n❌ Неверный выбор. Попробуйте снова.")
+
+def main():
+    """Основная функция"""
+    print("=" * 60)
+    print("TQTORRENT v1.0.0")
+    print("=" * 60)
+    
+    # Настройка логирования
+    log_file = setup_logging()
+    print(f"Логирование: {log_file}")
+    
+    # Проверяем структуру
+    base_dir = Path.home() / "Documents" / "TqTorrent"
+    if not base_dir.exists():
+        print("⚠️  Структура TqTorrent не найдена!")
+        response = input("Создать структуру? (Y/N): ").strip().lower()
+        if response == 'y':
+            # Создаём базовую структуру
+            (base_dir / "Localsaves_by_TqTorrent" / "saves").mkdir(parents=True, exist_ok=True)
+            (base_dir / "log").mkdir(parents=True, exist_ok=True)
+            print("✅ Структура создана")
+    
+    # Главное меню
+    main_menu()
 
 if __name__ == "__main__":
-    print("TqTorrent Structure Creator")
-    print("Скрипт создаст структуру папок и файлов для TqTorrent")
-    
-    # Проверяем существующую структуру
-    missing = check_existing_structure()
-    
-    if missing:
-        print(f"\nНайдено отсутствующих элементов: {len(missing)}")
-        response = input("Хотите создать отсутствующие элементы? (Y/N): ")
-        
-        if response.lower() == 'y':
-            success, result = create_tqtorrent_structure()
-        else:
-            print("Операция отменена пользователем.")
-            success = False
-            result = "Отменено пользователем"
-    else:
-        print("\nВся структура уже создана!")
-        response = input("Хотите пересоздать структуру? (Y/N): ")
-        
-        if response.lower() == 'y':
-            success, result = create_tqtorrent_structure()
-        else:
-            print("Структура оставлена без изменений.")
-            success = True
-            result = "Структура уже существует"
-    
-    # Ждём нажатия Enter перед закрытием
-    print("\n" + "=" * 50)
-    if success:
-        print("✅ СТРУКТУРА ГОТОВА К ИСПОЛЬЗОВАНИЮ")
-    else:
-        print("❚ ПРОИЗОШЛА ОШИБКА")
-    print("=" * 50)
-    
-    input("\nНажмите Enter для выхода...")
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\n\nПрограмма прервана пользователем")
+    except Exception as e:
+        print(f"\n❌ Критическая ошибка: {e}")
+        input("Нажмите Enter для выхода...")
