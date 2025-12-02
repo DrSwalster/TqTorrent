@@ -31,3 +31,20 @@ For detailed terms, see the [LICENSE](LICENSE) file.
 ## 📦 Installation
 ```bash
 # Installation instructions here
+
+# TqTorrent 🚀
+
+**Установщик и менеджер Python проектов**
+
+## 📦 Установка
+
+### Способ 1: Автоматическая установка (рекомендуется)
+1. Скачайте `TqTorrent_Installer.bat`
+2. Запустите его от имени администратора
+3. Следуйте инструкциям на экране
+
+### Способ 2: Ручная установка
+```bash
+git clone https://github.com/TqTorrent/TqTorrent.git
+cd TqTorrent
+python setup.py
