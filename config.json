@@ -1,0 +1,36 @@
+{
+  "app_name": "TqTorrent",
+  "version": "1.0.0",
+  "description": "Установщик и менеджер Python проектов",
+  "author": "TqTorrent Team",
+  "repository": "https://github.com/TqTorrent/TqTorrent",
+  "license": "MIT",
+  
+  "python_version": ">=3.8",
+  "dependencies": [
+    "requests",
+    "beautifulsoup4",
+    "psutil"
+  ],
+  
+  "optional_dependencies": {
+    "web": ["flask", "django", "fastapi"],
+    "data": ["pandas", "numpy", "matplotlib"],
+    "gui": ["PyQt5", "customtkinter"],
+    "automation": ["selenium", "pyautogui"]
+  },
+  
+  "paths": {
+    "install_dir": "Documents/TqTorrent",
+    "logs": "Documents/TqTorrent/log",
+    "saves": "Documents/TqTorrent/Localsaves_by_TqTorrent/saves"
+  },
+  
+  "features": [
+    "Автоматическая установка Python",
+    "Установка библиотек по категориям",
+    "Создание структуры проектов",
+    "Система логирования",
+    "Управление зависимостями"
+  ]
+}
