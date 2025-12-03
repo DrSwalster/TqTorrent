@@ -1,0 +1,264 @@
+:root {
+    --bg-color: #2c2c2c;      
+    --card-color: #3f3f3f;    
+    --accent-color: #00bcd4;  
+    --text-color: #ffffff;    
+    --inactive-color: #888888; 
+    --running-color: #4CAF50; 
+    --install-color: #00bcd4;
+    --launch-color: #2196F3;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    display: flex;
+    min-height: 100vh;
+}
+
+/* --- Боковая Панель (Sidebar) --- */
+.sidebar {
+    width: 250px;
+    background: var(--card-color);
+    padding: 20px;
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.4);
+    flex-shrink: 0;
+}
+
+.logo {
+    color: var(--accent-color);
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.nav-item {
+    display: block;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    text-decoration: none;
+    color: var(--text-color);
+    border-radius: 5px;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.nav-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-item.active {
+    background-color: var(--accent-color);
+    color: var(--card-color);
+    font-weight: bold;
+}
+
+/* --- Основное Содержимое (Main Content) --- */
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.main-content h1 {
+    color: var(--accent-color);
+    margin-bottom: 30px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 10px;
+}
+
+/* --- Сетка Игр --- */
+.game-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.game-card {
+    background-color: var(--card-color);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    position: relative;
+    transition: transform 0.3s, box-shadow 0.3s;
+    opacity: 0; /* Для анимации fadeIn */
+    cursor: pointer;
+}
+
+.game-card:hover {
+    transform: translateY(-5px); 
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
+}
+
+.game-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    display: block;
+    transition: filter 0.3s ease;
+}
+
+.game-card:hover img {
+    filter: brightness(0.7);
+}
+
+.card-info {
+    padding: 15px;
+}
+
+.card-info h3 {
+    margin-top: 0;
+    margin-bottom: 5px;
+    color: var(--accent-color);
+}
+
+/* Статус игры (Запущена) */
+.game-status {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.8em;
+    font-weight: bold;
+    background-color: var(--running-color);
+    color: var(--text-color);
+    opacity: 0.9;
+    z-index: 10;
+}
+
+/* Кнопки */
+.action-btn {
+    display: block;
+    width: calc(100% - 30px);
+    margin: 0 15px 15px 15px;
+    padding: 10px 0;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-install {
+    background-color: var(--install-color);
+    color: var(--card-color);
+}
+
+.btn-launch {
+    background-color: var(--launch-color);
+    color: var(--text-color);
+}
+
+.btn-running {
+    background-color: var(--running-color);
+    color: var(--card-color);
+    cursor: default;
+}
+
+.btn-install:hover, .btn-launch:hover {
+    opacity: 0.9;
+}
+
+/* --- Модальное окно детализации игры --- */
+.game-detail-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85); 
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0; 
+    pointer-events: none; 
+    transition: opacity 0.3s ease;
+}
+
+.game-detail-modal.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-content {
+    position: relative;
+    background-color: var(--card-color);
+    padding: 30px;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 900px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+    transform: scale(0.95); 
+    transition: transform 0.3s ease;
+}
+
+.game-detail-modal.is-visible .modal-content {
+    transform: scale(1); 
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    color: var(--text-color);
+    font-size: 30px;
+    font-weight: bold;
+    cursor: pointer;
+    background: none;
+    border: none;
+    transition: color 0.2s;
+}
+
+.close-btn:hover {
+    color: var(--accent-color);
+}
+
+.detail-header {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 20px;
+}
+
+.detail-image {
+    width: 300px;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0; 
+}
+
+.detail-info h2 {
+    color: var(--accent-color);
+    margin-top: 0;
+    font-size: 2em;
+}
+
+.detail-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+#detail-launch-btn {
+    width: 200px;
+}
+
+.detail-metadata {
+    font-size: 0.9em;
+    color: var(--inactive-color);
+}
+
+.detail-metadata strong {
+    color: var(--text-color);
+}

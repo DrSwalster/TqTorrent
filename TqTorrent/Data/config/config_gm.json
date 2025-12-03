@@ -1,0 +1,36 @@
+// Имитация данных об играх (предположительно, из config_gm.json)
+const GAME_DATA = [
+    {
+        id: 1,
+        title: "Euro Truck Simulator 2",
+        description: "Симулятор грузовых перевозок по Европе. Steam AppID: 227300",
+        image: "https://via.placeholder.com/300x180?text=ETS2",
+        steam_app_id: "227300",
+        launch_path: "C:\\Games\\ETS2\\bin\\win_x64\\ets2.exe"
+    },
+    {
+        id: 2,
+        title: "Microsoft Flight Simulator",
+        description: "Реалистичный симулятор полетов. Steam AppID: N/A",
+        image: "https://via.placeholder.com/300x180?text=MSFS",
+        steam_app_id: null,
+        launch_path: "C:\\Games\\MSFS\\FlightSimulator.exe"
+    },
+    {
+        id: 3,
+        title: "Dota 2",
+        description: "Популярная MOBA игра. Steam AppID: 570",
+        image: "https://via.placeholder.com/300x180?text=Dota+2",
+        steam_app_id: "570",
+        launch_path: "steam://rungameid/570" 
+    },
+    // --- ДОБАВЛЕНА НОВАЯ ИГРА: Counter-Strike 2 ---
+    {
+        id: 4,
+        title: "Counter-Strike 2",
+        description: "Легендарный тактический шутер. Steam AppID: 730",
+        image: "https://via.placeholder.com/300x180?text=CS2",
+        steam_app_id: "730",
+        launch_path: "C:\\Users\\drswa\\OneDrive\\Рабочий стол\\Counter-Strike 2.url"
+    }
+];

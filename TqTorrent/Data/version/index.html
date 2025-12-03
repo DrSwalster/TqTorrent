@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Catalog</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="sidebar">
+        <h3 class="logo" id="app-title">Загрузка...</h3>
+        <nav>
+            <a href="#" class="nav-item active">Все Игры</a>
+            <a href="#" class="nav-item">Установленные</a>
+            <a href="#" class="nav-item">Настройки</a>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <h1>Каталог Игр</h1>
+        <div class="game-grid" id="game-grid">
+            </div>
+    </div>
+
+    <div class="game-detail-modal" id="game-detail-modal">
+        <div class="modal-content">
+            <button class="close-btn" id="close-modal-btn">&times;</button>
+            <div class="detail-header">
+                <img id="detail-image" src="" alt="Обложка игры" class="detail-image">
+                <div class="detail-info">
+                    <h2 id="detail-title">Название игры</h2>
+                    <p id="detail-description">Подробное описание игры.</p>
+                </div>
+            </div>
+            <div class="detail-actions">
+                <button class="action-btn btn-launch" id="detail-launch-btn">Запустить</button>
+                <div class="detail-metadata">
+                    <p><strong>Steam AppID:</strong> <span id="detail-steam-id">N/A</span></p>
+                    <p><strong>Путь запуска:</strong> <span id="detail-path">N/A</span></p>
+                </div>
+            </div>
+            
+            <div class="detail-additional">
+                <h3>Дополнительная информация</h3>
+                <p>Здесь можно добавить системные требования, статистику или новости.</p>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
