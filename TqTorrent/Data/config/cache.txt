@@ -1,7 +1,4 @@
-g1 = name(Euro Truck Simulator 2), priwie(https://via.placeholder.com/300x180?text=ETS2), opisan(Симулятор грузовых перевозок по Европе.), url_ins(ссылка_на_скачивание_ets2), dowanloadin(ets2.exe), starting(C:\Games\ETS2\bin\win_x64\ets2.exe)
+g2 = name(Euro Truck Simulator 2), priwie(https://via.placeholder.com/300x180?text=ETS2), opisan(Симулятор грузовых перевозок по Европе.), url_ins(ссылка_на_скачивание_ets2), dowanloadin(ets2.exe), starting("C:\Program Files (x86)\Steam\steamapps\common\Euro Truck Simulator 2\bin\win_x64\eurotrucks2.exe"), status(УСТАНОВЛЕНО)
 
-g2 = name(Microsoft Flight Simulator), priwie(https://via.placeholder.com/300x180?text=MSFS), opisan(Реалистичный симулятор полетов.), url_ins(ссылка_на_скачивание_msfs), dowanloadin(flightsimulator.exe), starting(C:\Games\MSFS\FlightSimulator.exe)
+g1 = name(Microsoft Flight Simulator), priwie(https://via.placeholder.com/300x180?text=MSFS), opisan(Реалистичный симулятор полетов.), url_ins(ссылка_на_скачивание_msfs), dowanloadin(flightsimulator.exe), starting(C:\Games\MSFS\FlightSimulator.exe), status(НЕ СКАЧЕНО)
 
-g3 = name(Dota 2), priwie(https://via.placeholder.com/300x180?text=Dota+2), opisan(Популярная MOBA игра.), url_ins(ссылка_на_скачивание_dota2), dowanloadin(dota2.exe), starting(steam://rungameid/570)
-
-g4 = name(Counter-Strike 2), priwie(https://via.placeholder.com/300x180?text=CS2), opisan(Легендарный тактический шутер.), url_ins(ссылка_на_скачивание_cs2), dowanloadin(cs2.exe), starting(C:\Program Files (x86)\Steam\steamapps\common\Counter-Strike Global Offensive\game\bin\win64\cs2.exe)
